@@ -7,7 +7,7 @@ ADD Procfile /etc/Procfile
 
 RUN apt-get update  && \
     # install packages
-    apt-get install -y --no-install-recommends apt-transport-https ca-certificates lxc iptables git make openssh-server openjdk-7-jre-headless && \
+    apt-get install -y --no-install-recommends apt-transport-https ca-certificates lxc iptables git make openssh-server openjdk-7-jre-headless sudo && \
     mkdir -p /var/run/sshd && \
     bash /tmp/get-docker.sh && \
     # install docker-compose
@@ -23,7 +23,8 @@ RUN apt-get update  && \
     sed -i 's/# otherwise, spawn a shell as well/exec docker -d $DOCKER_DAEMON_ARGS/g' /usr/local/bin/wrapdocker && \
     # add jenkins user
     useradd -U -m -s /bin/bash -G docker jenkins && \
-    echo "jenkins:jenkins" | chpasswd
+    echo "jenkins:jenkins" | chpasswd && \
+    echo "jenkins  ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 VOLUME /var/lib/docker
 
