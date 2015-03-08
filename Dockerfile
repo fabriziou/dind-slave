@@ -25,6 +25,6 @@ RUN apt-get update  && \
 
 VOLUME /var/lib/docker
 
-CMD /usr/local/bin/wrapdocker && \
-    service docker start && \
-    /usr/sbin/sshd -D
+ADD start.sh /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]
