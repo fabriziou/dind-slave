@@ -1,9 +1,7 @@
 FROM debian:wheezy
 
 ADD https://get.docker.com/ /tmp/get-docker.sh
-ADD https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego /usr/local/bin/forego
 ADD https://raw.githubusercontent.com/jpetazzo/dind/master/wrapdocker /usr/local/bin/wrapdocker
-ADD Procfile /etc/Procfile
 
 RUN apt-get update  && \
     # install packages
@@ -17,10 +15,9 @@ RUN apt-get update  && \
     rm -rf /var/cache/* /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     # make wrapdocker, forego and docker-compose executable
     chmod +x /usr/local/bin/wrapdocker && \
-    chmod +x /usr/local/bin/forego && \
     chmod +x /usr/local/bin/docker-compose && \
-    # patch wrapdocker to always start docker daemon in foreground
-    sed -i 's/# otherwise, spawn a shell as well/exec docker -d $DOCKER_DAEMON_ARGS/g' /usr/local/bin/wrapdocker && \
+    # patch wrapdocker to always exit after setup
+    sed -i 's/# otherwise, spawn a shell as well/exit 0/g' /usr/local/bin/wrapdocker && \
     # add jenkins user
     useradd -U -m -s /bin/bash -G docker jenkins && \
     echo "jenkins:jenkins" | chpasswd && \
@@ -28,4 +25,6 @@ RUN apt-get update  && \
 
 VOLUME /var/lib/docker
 
-CMD ["forego", "start", "-f", "/etc/Procfile", "-r"]
+CMD /usr/local/bin/wrapdocker && \
+    service docker start && \
+    /usr/sbin/sshd -D
